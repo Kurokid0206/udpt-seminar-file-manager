@@ -31,3 +31,4 @@ env
 .vscode
 .idea
 db.sqlite3
+fileManager-fe/.env
