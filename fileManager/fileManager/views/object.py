@@ -23,7 +23,7 @@ class ObjectViewSet(viewsets.ModelViewSet):
     def create_sub_dir(self, request, pk=None):
         root = Object.objects.get(object_id=pk)
         request_data = request.data
-        request_data['key'] = root.key+'/'+root.name+'/'
+        request_data['key'] = root.key+'/'+root.name
         request_data['parent_root'] = pk
         serializer = ObjectSerializer(data=request_data)
 
@@ -42,7 +42,7 @@ class ObjectViewSet(viewsets.ModelViewSet):
         root = Object.objects.get(object_id=pk)
 
         request_data = request.data
-        request_data['key'] = root.key+root.name+'/'
+        request_data['key'] = root.key+'/'+root.name
         request_data['parent_root'] = pk
         file = request.FILES['file']
         request_data['name'] = file.name
