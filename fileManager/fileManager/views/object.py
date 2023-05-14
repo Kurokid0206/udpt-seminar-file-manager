@@ -1,4 +1,5 @@
 
+import datetime
 from rest_framework import viewsets, status
 
 from rest_framework.response import Response
@@ -12,7 +13,7 @@ class ObjectViewSet(viewsets.ModelViewSet):
     serializer_class = ObjectSerializer
     queryset = Object.objects.all()
 
-    @action(detail=True, methods=['GET'], url_path='get-dir')
+    @action(detail=True, methods=['GET'], url_path='get-sub')
     def get_sub_dir(self, request, pk=None):
         sub_dir = Object.objects.filter(parent_root=pk)
         serializer = ObjectSerializer(sub_dir, many=True)
@@ -21,16 +22,18 @@ class ObjectViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['POST'], url_path='create-dir')
     def create_sub_dir(self, request, pk=None):
         root = Object.objects.get(object_id=pk)
-
         request_data = request.data
         request_data['key'] = root.key+'/'+root.name+'/'
         request_data['parent_root'] = pk
-        print(request_data)
         serializer = ObjectSerializer(data=request_data)
 
         if serializer.is_valid():
-            serializer.create(validated_data=serializer.validated_data)
-            return Response({'status': status.HTTP_200_OK, 'message': 'success'})
+            object = serializer.create(
+                validated_data=serializer.validated_data)
+            result = ObjectSerializer(object).data
+            return Response({'status': status.HTTP_200_OK,
+                             'message': 'success',
+                             'data': result})
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -43,12 +46,24 @@ class ObjectViewSet(viewsets.ModelViewSet):
         request_data['parent_root'] = pk
         file = request.FILES['file']
         request_data['name'] = file.name
-
         serializer = ObjectSerializer(data=request_data)
 
         if serializer.is_valid():
             # Upload file
-            serializer.create(validated_data=serializer.validated_data)
-            return Response({'status': status.HTTP_200_OK, 'message': 'success'})
+            try:
+                object = serializer.create(
+                    validated_data=serializer.validated_data)
+                result = ObjectSerializer(object).data
+                return Response({'status': status.HTTP_200_OK,
+                                 'message': 'success',
+                                 'data': result})
+            except Exception:
+                return Response({
+                    'status': status.HTTP_400_BAD_REQUEST,
+                    'error': 'File name has been taken',
+                }, status=status.HTTP_400_BAD_REQUEST)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                'status': status.HTTP_400_BAD_REQUEST,
+                'error': 'Invalid file',
+            },  status=status.HTTP_400_BAD_REQUEST)
