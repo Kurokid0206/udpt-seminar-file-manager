@@ -1,13 +1,8 @@
-import { useState } from "react";
 import "./App.css";
-import InteractiveList from "./components/list";
+import Home from "./pages/home/Home";
 
 function App() {
-  return (
-    <div className="App">
-      <InteractiveList />
-    </div>
-  );
+  return <Home />;
 }
 
 export default App;
