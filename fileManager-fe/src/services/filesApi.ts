@@ -15,5 +15,9 @@ export const createDir = (parent_id: number, name: string) => {
 export const uploadFile = (parent_id: number, file: FormData) => {
   const url = `${parent_id}/upload-file`;
 
-  return httpRequest.post(url, file);
+  return httpRequest.post(url, file, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
 };

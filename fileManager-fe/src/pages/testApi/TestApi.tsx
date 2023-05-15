@@ -4,7 +4,7 @@ import { useMutation, useQuery } from "react-query";
 
 const TestApi: React.FC = () => {
   const parent_id = 1;
-  const [file, setFile] = React.useState(null);
+  const [file, setFile] = React.useState<File>();
 
   const uploadFIle = () => {
     if (file) {
@@ -53,7 +53,7 @@ const TestApi: React.FC = () => {
         type="file"
         name="file"
         id=""
-        onChange={(e) => setFile(e.target.files[0])}
+        onChange={(e) => setFile(e.target.files![0])}
       />
       <button onClick={() => uploadFIle()}>upload</button>
     </>
