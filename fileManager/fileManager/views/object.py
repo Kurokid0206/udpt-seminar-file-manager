@@ -46,6 +46,7 @@ class ObjectViewSet(viewsets.ModelViewSet):
         request_data['parent_root'] = pk
         file = request.FILES['file']
         request_data['name'] = file.name
+        request_data['is_file'] = True
         serializer = ObjectSerializer(data=request_data)
 
         if serializer.is_valid():

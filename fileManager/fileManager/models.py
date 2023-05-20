@@ -7,6 +7,7 @@ class Object(models.Model):
         'object', on_delete=models.CASCADE, null=True, blank=True)
     key = models.CharField(max_length=250, null=False, blank=True)
     name = models.CharField(max_length=100)
+    is_file = models.BooleanField(default=False)
 
     @classmethod
     def exists(cls):
