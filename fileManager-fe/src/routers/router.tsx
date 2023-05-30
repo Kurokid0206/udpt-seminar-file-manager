@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "../pages/home/Home";
-import ViewFile from "../pages/viewFiles/ViewFiles";
+import ViewFile from "../pages/explorerFiles/ViewFiles";
 import AddFile from "../pages/addFile/AddFile";
 import TestApi from "../pages/testApi/TestApi";
 

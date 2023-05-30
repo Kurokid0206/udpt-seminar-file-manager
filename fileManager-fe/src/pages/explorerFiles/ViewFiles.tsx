@@ -10,7 +10,7 @@ import Box from "@mui/material/Box";
 import BottomNavigationAction from "@mui/material/BottomNavigationAction";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
-import { getSub } from "../../services/filesApi";
+import { createDir, getSub } from "../../services/filesApi";
 import React from "react";
 import FolderIcon from "@mui/icons-material/Folder";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
@@ -25,20 +25,81 @@ import {
   IconButton,
   TextField,
 } from "@mui/material";
+import { useMutation, useQueries, useQuery } from "react-query";
+
+const data: iFile[] = [
+  {
+    object_id: 2,
+    dayCreate: "2023/12/01 12:08:01",
+    dayModifed: "2023/12/01 12:08:05",
+    is_file: false,
+    key: "son-tm/",
+    name: "profile",
+    parent_root: 1,
+  },
+  {
+    object_id: 3,
+    dayCreate: "2023/12/02 12:08:01",
+    dayModifed: "2023/12/02 12:08:05",
+    is_file: true,
+    key: "son-tm/",
+    name: "som-tm.txt",
+    parent_root: 1,
+  },
+];
 
 export default function ViewFile() {
   const [files, setFiles] = React.useState<iFile[]>([]);
   const [isOpen, setIsOpen] = React.useState(false);
+  const [nowParentRoot, setNowParentRoot] = React.useState<number>(1);
+  const [addName, setAddName] = React.useState<string>("");
 
+  //==================================================================================
+  //envent handler
   const handleClose = () => {
     setIsOpen(false);
   };
 
+  const handleAddFile = () => {
+    addFileMutation.mutate({ parentID: nowParentRoot, fileName: addName });
+    setIsOpen(false);
+  };
+
+  //==================================================================================
+  //query and mutation
+  const addFileMutation = useMutation(
+    (data: { parentID: number; fileName: string }) => {
+      return createDir(data.parentID, data.fileName);
+    }
+  );
+  const getAllItemQuery = useQuery(
+    ["getAllItemQuery", nowParentRoot],
+    () => getSub(nowParentRoot),
+    {
+      retry: 2,
+      refetchOnWindowFocus: false,
+      refetchInterval: 0,
+    }
+  );
+
+  // React.useEffect(() => {
+  //   if(!getAllItemQuery.data){
+  //     return
+  //   }
+  //   var newListFile: iFile[]=[]
+  //   getAllItemQuery.data.forEach()
+  //   getAllItemQuery.data
+  //   var file: iFile
+  //   file={
+
+  //   }
+  // }, [getAllItemQuery.data]);
+
   React.useEffect(() => {
-    getSub(1).then((res) => {
-      setFiles(res);
-    });
-  }, []);
+    if (addFileMutation.isSuccess === true) {
+      getAllItemQuery.refetch();
+    }
+  }, [addFileMutation.isLoading]);
 
   return (
     <div>
@@ -71,11 +132,14 @@ export default function ViewFile() {
             label="Folder name"
             fullWidth
             variant="standard"
+            onChange={(e) => {
+              setAddName(e.target.value);
+            }}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleClose}>Add</Button>
+          <Button onClick={handleAddFile}>Add</Button>
         </DialogActions>
       </Dialog>
 
@@ -83,10 +147,9 @@ export default function ViewFile() {
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Is File</TableCell>
-              <TableCell>Object ID</TableCell>
-              <TableCell>Name</TableCell>
-              <TableCell>Download</TableCell>
+              <TableCell>File name</TableCell>
+              <TableCell>Last modified</TableCell>
+              <TableCell>Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
