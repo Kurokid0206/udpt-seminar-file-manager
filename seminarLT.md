@@ -38,6 +38,8 @@
 - S3 Object Owner: là người sở hữu object. S3 Object Owner có thể quản lý quyền truy cập vào object.
 - S3 Bucket User: là người được cấp quyền truy cập vào bucket. S3 Bucket User có thể quản lý quyền truy cập vào các object trong bucket. S3 Bucket User có thể quản lý quyền truy cập vào các bucket khác.
 - S3 Object User: là người được cấp quyền truy cập vào object. S3 Object User có thể quản lý quyền truy cập vào object.
+- S3 Bucket Group: là nhóm được cấp quyền truy cập vào bucket. S3 Bucket Group có thể quản lý quyền truy cập vào các object trong bucket. S3 Bucket Group có thể quản lý quyền truy cập vào các bucket khác.
+- S3 Object Group: là nhóm được cấp quyền truy cập vào object. S3 Object Group có thể quản lý quyền truy cập vào object.
 
 ### Xây dựng ứng dụng demo
 
