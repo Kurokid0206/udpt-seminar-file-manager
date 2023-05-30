@@ -26,13 +26,6 @@ import {
   TextField,
 } from "@mui/material";
 
-interface iFile {
-  object_id: string;
-  name: string;
-  key: string;
-  is_file: boolean;
-  parent_root: number;
-}
 export default function ViewFile() {
   const [files, setFiles] = React.useState<iFile[]>([]);
   const [isOpen, setIsOpen] = React.useState(false);

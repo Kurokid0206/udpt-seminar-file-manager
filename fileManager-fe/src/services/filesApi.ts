@@ -3,7 +3,7 @@ import httpRequest from "../utils/httpRequest";
 export const getSub = (parent_id: number) => {
   const url = `${parent_id}/get-sub`;
 
-  return httpRequest.get(url, {});
+  return httpRequest.get<iFile[]>(url, {});
 };
 
 export const createDir = (parent_id: number, name: string) => {

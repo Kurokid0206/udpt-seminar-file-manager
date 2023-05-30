@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { createDir, getSub, uploadFile } from "../../services/filesApi";
 import { useMutation, useQuery } from "react-query";
 
