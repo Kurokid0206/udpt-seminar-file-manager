@@ -32,6 +32,67 @@
 
 - S3 Storage là các lớp lưu trữ của AWS S3. Có 6 loại S3 Storage: S3 Standard, S3 Intelligent-Tiering, S3 Standard-Infrequent Access, S3 One Zone-Infrequent Access, S3 Glacier, S3 Glacier Deep Archive. S3 Standard được sử dụng để lưu trữ các object có thể truy cập được nhiều lần trong một tháng. S3 Intelligent-Tiering được sử dụng để lưu trữ các object có thể truy cập được nhiều lần trong một tháng. S3 Standard-Infrequent Access được sử dụng để lưu trữ các object có thể truy cập được ít lần trong một tháng. S3 One Zone-Infrequent Access được sử dụng để lưu trữ các object có thể truy cập được ít lần trong một tháng. S3 Glacier được sử dụng để lưu trữ các object có thể truy cập được ít lần trong một tháng. S3 Glacier Deep Archive được sử dụng để lưu trữ các object có thể truy cập được ít lần trong một tháng.
 
+- Amazon S3 Standard (S3 Standard)
+
+  - Là class thông dụng nhất
+  - Được thiết kế cho tất cả các mục đích lưu trữ
+  - Là lựa chọn mặc định
+  - 99.999999999% độ bền object (11 9's)
+  - 99.99% độ khả dụng object
+  - Có chi phí cao nhất
+  - Use-case: Dùng cho phân tích dữ liệu, Mobile & gaming application, content distribution...
+
+- S3 Standard-Infrequent Access (Standard-IA)
+
+  - Được thiết kế cho các object không được truy cập thường xuyên nhưng cần phải khả dụng ngay lập tức khi được truy cập.
+  - 99.999999999% độ bền object (11 9')
+  - 99.9% độ khả dụng object
+  - Chi phí rẻ hơn Standard
+  - Use-case: Dữ liệu backup cho phục hồi khi thiên tai...
+
+- S3 One Zone-Infrequent Access (One Zone-IA)
+
+  - Tương tự như IA nhưng được lưu trữ ở một single AZ
+  - 99.999999999% độ bền object (11 9's) trong single AZ, nếu AZ đó bị phá hủy, dữ liệu sẽ bị mất đi
+  - Latency thấp và throughput cao
+  - Hỗ trợ SSL với dữ liệu đang truyền đi, và mã hóa dữ liệu đã lưu trữ
+  - Chi phí rẻ hơn Standard-IA (~20%)
+  - Use-case: Sử dụng trong lưu trữ bản sao dự phòng thứ cấp của on-premise data, hoặc dữ liệu dễ dàng tạo lại
+
+- S3 Intelligent-Tiering
+
+  - Được thiết kế cho các object chưa xác định mức độ truy cập hoặc có mức độ truy cập không cố định. S3 sẽ theo dõi mức độ truy cập các object và chuyển chúng vào cấp truy cập phù hợp.
+  - 99.999999999% độ bền object (11 9's)
+  - 99.9% độ khả dụng object
+  - Chi phí thấp cho việc monitor hàng tháng và chuyển đổi kiểu lưu trữ
+
+- S3 Glacier
+
+  - Được thiết kế cho việc lưu trữ dung lượng lớn, dài hạn
+  - Thời gian truy xuất dữ liệu có thể từ vài phút đến vài tiếng
+  - Mỗi item trong Glacier gọi là "Archive" (tối đa 40TB)
+  - Những Archives được lưu trữ trong "Vaults". Để dễ hình dung thì "Vaults" là folder ảnh về biển "Beach" còn "Archive" là những bức ảnh về bãi biển chứa trong vaults
+  - Glacier có 3 option truy xuất dữ liệu
+    - Expedited (1-5 phút) (đắt hơn 2 option còn lại)
+    - Standard (3-5 giờ)
+    - Bulk (5- 12 giờ)
+  - Thời gian lưu trữ tối thiểu là 90 ngày
+
+- S3 Glacier Deep Archive
+
+  - Tương tự như Glacier nhưng sử dụng cho việc lưu trữ dài hạn hơn Glacier
+  - Chi phí rẻ hơn Glacier
+  - Là storage class có giá rẻ nhất
+  - Glacier Deep Archive có 2 option truy xuất dữ liệu
+    - Standard (12 giờ)
+    - Bulk (48 giờ)
+  - Thời gian lưu trữ tối thiểu là 180 ngày
+
+- Hiệu suất trên các Lớp lưu trữ S3
+<!-- có 1 hình ảnh ở đây -->
+
+-> Mỗi Storage Class trong Amazon S3 có tính năng và mức giá khác nhau, cho phép người dùng tối ưu hóa chi phí lưu trữ dữ liệu dựa trên yêu cầu của dự án.
+
 ### S3 Access Control
 
 - S3 Access Control List (ACL): được sử dụng để quản lý quyền truy cập vào object. Có 2 loại ACL: ACL của bucket và ACL của object. ACL của bucket được sử dụng để quản lý quyền truy cập vào bucket. ACL của object được sử dụng để quản lý quyền truy cập vào object. Có 3 loại ACL của object: ACL của owner, ACL của các user được chỉ định, ACL của các user được chỉ định bởi bucket owner.
