@@ -8,6 +8,8 @@ class Object(models.Model):
     key = models.CharField(max_length=250, null=False, blank=True)
     name = models.CharField(max_length=100)
     is_file = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     @classmethod
     def exists(cls):

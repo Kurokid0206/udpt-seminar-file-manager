@@ -8,3 +8,7 @@ class FileManagerConfig(AppConfig):
 
     def ready(self):
         call_command("migrate")
+        from fileManager.models import Object
+        objs = Object.objects.all()
+        if len(objs) == 0:
+            Object.objects.create(name='root')
