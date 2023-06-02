@@ -10,7 +10,7 @@ import Box from "@mui/material/Box";
 import BottomNavigationAction from "@mui/material/BottomNavigationAction";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
-import { createDir, getSub } from "../../services/filesApi";
+import { createDir, getSub, uploadFile } from "../../services/filesApi";
 import React from "react";
 import FolderIcon from "@mui/icons-material/Folder";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
@@ -25,56 +25,72 @@ import {
   IconButton,
   TextField,
 } from "@mui/material";
-import { useMutation, useQueries, useQuery } from "react-query";
+import { useMutation, useQuery } from "react-query";
 
-const data: iFile[] = [
-  {
-    object_id: 2,
-    dayCreate: "2023/12/01 12:08:01",
-    dayModifed: "2023/12/01 12:08:05",
-    is_file: false,
-    key: "son-tm/",
-    name: "profile",
-    parent_root: 1,
-  },
-  {
-    object_id: 3,
-    dayCreate: "2023/12/02 12:08:01",
-    dayModifed: "2023/12/02 12:08:05",
-    is_file: true,
-    key: "son-tm/",
-    name: "som-tm.txt",
-    parent_root: 1,
-  },
-];
-
+interface IRoot {
+  id: number;
+  name: string;
+}
 export default function ViewFile() {
   const [files, setFiles] = React.useState<iFile[]>([]);
   const [isOpen, setIsOpen] = React.useState(false);
-  const [nowParentRoot, setNowParentRoot] = React.useState<number>(1);
+  const [isShowAddFileDialog, setIsShowAddFileDialog] =
+    React.useState<boolean>(false);
+  const [nowParentRoot, setNowParentRoot] = React.useState<IRoot>({
+    id: 1,
+    name: "root",
+  });
   const [addName, setAddName] = React.useState<string>("");
-
+  const [listPrevRoot, setListPrevRoot] = React.useState<IRoot[]>([]);
+  const [file, setFile] = React.useState<File>();
   //==================================================================================
-  //envent handler
-  const handleClose = () => {
+  //event handler
+  const handleCloseAddFolder = () => {
+    setIsOpen(false);
+  };
+
+  const handleCloseAddFile = () => {
+    setIsShowAddFileDialog(false);
+  };
+
+  const handleAddFolder = () => {
+    addFolderMutation.mutate({
+      parentID: nowParentRoot.id,
+      folderName: addName,
+    });
     setIsOpen(false);
   };
 
   const handleAddFile = () => {
-    addFileMutation.mutate({ parentID: nowParentRoot, fileName: addName });
+    const formData = new FormData();
+    formData.append("file", file);
+    addFileMutation.mutate({
+      parentID: nowParentRoot.id,
+      formData: formData,
+    });
     setIsOpen(false);
   };
 
   //==================================================================================
   //query and mutation
-  const addFileMutation = useMutation(
-    (data: { parentID: number; fileName: string }) => {
-      return createDir(data.parentID, data.fileName);
+  const addFolderMutation = useMutation(
+    (data: { parentID: number; folderName: string }) => {
+      return createDir(data.parentID, data.folderName);
     }
   );
+
+  const addFileMutation = useMutation(
+    (data: { parentID: number; formData: FormData }) => {
+      return uploadFile(data.parentID, data.formData);
+    }
+  );
+
   const getAllItemQuery = useQuery(
     ["getAllItemQuery", nowParentRoot],
-    () => getSub(nowParentRoot),
+    () =>
+      getSub(nowParentRoot.id).then((result) => {
+        setFiles(result);
+      }),
     {
       retry: 2,
       refetchOnWindowFocus: false,
@@ -101,6 +117,7 @@ export default function ViewFile() {
     }
   }, [addFileMutation.isLoading]);
 
+  React.useEffect(() => {}, [nowParentRoot]);
   return (
     <div>
       <div className="flex justify-end">
@@ -108,18 +125,23 @@ export default function ViewFile() {
           <BottomNavigation showLabels className="flex gap-2">
             <BottomNavigationAction
               onClick={() => {
-                // console.log("add");
                 setIsOpen(true);
               }}
               label="Add folder"
               icon={<CreateNewFolderIcon />}
             />
-            <BottomNavigationAction label="Add File" icon={<NoteAddIcon />} />
+            <BottomNavigationAction
+              onClick={() => {
+                setIsShowAddFileDialog(true);
+              }}
+              label="Add File"
+              icon={<NoteAddIcon />}
+            />
           </BottomNavigation>
         </Box>
       </div>
 
-      <Dialog open={isOpen} onClose={handleClose}>
+      <Dialog open={isOpen} onClose={handleCloseAddFolder}>
         <DialogTitle>Add new Folder</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -138,15 +160,48 @@ export default function ViewFile() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleCloseAddFolder}>Cancel</Button>
+          <Button onClick={handleAddFolder}>Add</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={isShowAddFileDialog} onClose={handleCloseAddFile}>
+        <DialogTitle>Add new File</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Enter the name of the new folder
+          </DialogContentText>
+          <input
+            type="file"
+            name="file"
+            id=""
+            onChange={(e) => setFile(e.target.files![0])}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseAddFile}>Cancel</Button>
           <Button onClick={handleAddFile}>Add</Button>
         </DialogActions>
       </Dialog>
 
+      <Box>
+        {listPrevRoot.map((root) => (
+          <Button
+            onClick={() => {
+              setNowParentRoot(root);
+              setListPrevRoot(listPrevRoot.slice(0, -1));
+            }}
+          >
+            {root.name}
+          </Button>
+        ))}
+      </Box>
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 650 }} aria-label="simple table">
           <TableHead>
             <TableRow>
+              <TableCell>Type</TableCell>
+              <TableCell>File id</TableCell>
               <TableCell>File name</TableCell>
               <TableCell>Last modified</TableCell>
               <TableCell>Action</TableCell>
@@ -164,12 +219,26 @@ export default function ViewFile() {
                   </TableCell>
                 ) : (
                   <TableCell>
-                    <FolderIcon />
+                    <Button
+                      onClick={() => {
+                        setListPrevRoot([...listPrevRoot, nowParentRoot]);
+
+                        setNowParentRoot({
+                          id: file.object_id,
+                          name: file.name,
+                        });
+                      }}
+                    >
+                      <FolderIcon />
+                    </Button>
                   </TableCell>
                 )}
                 <TableCell>{file.object_id}</TableCell>
                 <TableCell component="th" scope="row">
                   {file.name}
+                </TableCell>
+                <TableCell component="th" scope="row">
+                  {file.updated_at}
                 </TableCell>
                 <TableCell>
                   <IconButton
@@ -177,7 +246,7 @@ export default function ViewFile() {
                       console.log(file.key);
                     }}
                   >
-                    <FileDownloadIcon />
+                    {file.is_file ? <FileDownloadIcon /> : null}
                   </IconButton>
                 </TableCell>
               </TableRow>

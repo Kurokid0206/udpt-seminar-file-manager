@@ -4,6 +4,6 @@ interface iFile {
   key: string;
   is_file: boolean;
   parent_root: number;
-  dayModifed: string;
-  dayCreate: string;
+  created_ad: string;
+  updated_at: string;
 }
