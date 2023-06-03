@@ -187,6 +187,7 @@ export default function ViewFile() {
       <Box>
         {listPrevRoot.map((root) => (
           <Button
+            key={root.id}
             onClick={() => {
               setNowParentRoot(root);
               setListPrevRoot(listPrevRoot.slice(0, -1));
@@ -210,7 +211,7 @@ export default function ViewFile() {
           <TableBody>
             {files.map((file) => (
               <TableRow
-                key={file.object_id}
+                key={`${file.object_id}`}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
                 {file.is_file ? (
@@ -243,7 +244,8 @@ export default function ViewFile() {
                 <TableCell>
                   <IconButton
                     onClick={() => {
-                      console.log(file.key);
+                      const url = `https://ti-pt-demo.s3.ap-southeast-1.amazonaws.com/${file.key}/${file.name}`;
+                      console.log(url);
                     }}
                   >
                     {file.is_file ? <FileDownloadIcon /> : null}

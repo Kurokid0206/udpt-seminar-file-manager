@@ -3,10 +3,11 @@ import datetime
 from rest_framework import viewsets, status
 
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 from fileManager.serializers.object import ObjectSerializer
 from fileManager.models import Object
-from rest_framework.decorators import action
+from fileManager.utils.s3 import uploadFile2S3
 
 
 class ObjectViewSet(viewsets.ModelViewSet):
@@ -52,13 +53,15 @@ class ObjectViewSet(viewsets.ModelViewSet):
         if serializer.is_valid():
             # Upload file
             try:
+                uploadFile2S3(file, request_data['key'])
                 object = serializer.create(
                     validated_data=serializer.validated_data)
                 result = ObjectSerializer(object).data
                 return Response({'status': status.HTTP_200_OK,
                                  'message': 'success',
                                  'data': result})
-            except Exception:
+            except Exception as e:
+                print(f'error: {e}')
                 return Response({
                     'status': status.HTTP_400_BAD_REQUEST,
                     'error': 'File name has been taken',
