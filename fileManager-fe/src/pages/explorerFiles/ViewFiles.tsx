@@ -5,9 +5,8 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import BottomNavigation from "@mui/material/BottomNavigation";
 import Box from "@mui/material/Box";
-import BottomNavigationAction from "@mui/material/BottomNavigationAction";
+import KeyboardBackspaceIcon from "@mui/icons-material/KeyboardBackspace";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import { createDir, getSub, uploadFile } from "../../services/filesApi";
@@ -16,16 +15,20 @@ import FolderIcon from "@mui/icons-material/Folder";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import {
+  Breadcrumbs,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Fab,
   IconButton,
   TextField,
+  dividerClasses,
 } from "@mui/material";
 import { useMutation, useQuery } from "react-query";
+import dayjs from "dayjs";
 
 interface IRoot {
   id: number;
@@ -38,11 +41,12 @@ export default function ViewFile() {
     React.useState<boolean>(false);
   const [nowParentRoot, setNowParentRoot] = React.useState<IRoot>({
     id: 1,
-    name: "root",
+    name: "root bucket",
   });
   const [addName, setAddName] = React.useState<string>("");
-  const [listPrevRoot, setListPrevRoot] = React.useState<IRoot[]>([]);
   const [file, setFile] = React.useState<File>();
+  const [listPrevRoot, setListPrevRoot] = React.useState<IRoot[]>([]);
+
   //==================================================================================
   //event handler
   const handleCloseAddFolder = () => {
@@ -63,17 +67,46 @@ export default function ViewFile() {
 
   const handleAddFile = () => {
     const formData = new FormData();
+    if (!file) return;
     formData.append("file", file);
     addFileMutation.mutate({
       parentID: nowParentRoot.id,
       formData: formData,
     });
-    setIsOpen(false);
+    setIsShowAddFileDialog(false);
+  };
+
+  const clickPreBreadcrumb = (id: number) => {
+    var listNewPrevRoot: IRoot[] = [];
+    for (let index = 0; index < listPrevRoot.length; index++) {
+      const element = listPrevRoot[index];
+      if (element.id !== id) {
+        listNewPrevRoot.push(element);
+      } else {
+        setNowParentRoot(element);
+        break;
+      }
+    }
+    setListPrevRoot(listNewPrevRoot);
+  };
+  const handleBackNavigation = () => {
+    var listNewPrevRoot: IRoot[] = [];
+    for (let index = 0; index < listPrevRoot.length; index++) {
+      const element = listPrevRoot[index];
+      listNewPrevRoot.push(element);
+    }
+    if (listNewPrevRoot.length === 0) return;
+    var nowParent: IRoot | undefined = listNewPrevRoot.pop();
+    setListPrevRoot(listNewPrevRoot);
+    if (nowParent) {
+      setNowParentRoot(nowParent);
+    }
   };
 
   const handleDownloadFile = async (url: string) => {
-    console.log(url);
+    //console.log(url);
     const response = await fetch(
+      // đổi chỗ này khi chạy thật
       "https://ti-pt-demo.s3.ap-southeast-1.amazonaws.com///AishiaNight.png"
     );
 
@@ -91,6 +124,7 @@ export default function ViewFile() {
     document.body.removeChild(anchorElement);
     window.URL.revokeObjectURL(href);
   };
+
   //==================================================================================
   //query and mutation
   const addFolderMutation = useMutation(
@@ -118,47 +152,46 @@ export default function ViewFile() {
     }
   );
 
-  // React.useEffect(() => {
-  //   if(!getAllItemQuery.data){
-  //     return
-  //   }
-  //   var newListFile: iFile[]=[]
-  //   getAllItemQuery.data.forEach()
-  //   getAllItemQuery.data
-  //   var file: iFile
-  //   file={
-
-  //   }
-  // }, [getAllItemQuery.data]);
-
+  //=======================================================================
+  // side effect
   React.useEffect(() => {
     if (addFileMutation.isSuccess === true) {
       getAllItemQuery.refetch();
     }
-  }, [addFileMutation.isLoading]);
+    if (addFolderMutation.isSuccess === true) {
+      getAllItemQuery.refetch();
+    }
+  }, [addFileMutation.isLoading, addFolderMutation.isLoading]);
 
-  React.useEffect(() => {}, [nowParentRoot]);
-
+  console.log(listPrevRoot.length === 0);
   return (
     <div>
       <div className="flex justify-end">
         <Box sx={{ width: 500 }}>
-          <BottomNavigation showLabels className="flex gap-2">
-            <BottomNavigationAction
+          <div className="flex gap-2 justify-end">
+            <Fab
+              color="secondary"
+              aria-label="Add folder"
+              variant="extended"
               onClick={() => {
                 setIsOpen(true);
               }}
-              label="Add folder"
-              icon={<CreateNewFolderIcon />}
-            />
-            <BottomNavigationAction
+            >
+              <CreateNewFolderIcon sx={{ mr: 1 }} />
+              Add folder
+            </Fab>
+            <Fab
+              color="secondary"
+              aria-label="Add file"
+              variant="extended"
               onClick={() => {
                 setIsShowAddFileDialog(true);
               }}
-              label="Add File"
-              icon={<NoteAddIcon />}
-            />
-          </BottomNavigation>
+            >
+              <NoteAddIcon sx={{ mr: 1 }} />
+              Add file
+            </Fab>
+          </div>
         </Box>
       </div>
 
@@ -205,68 +238,103 @@ export default function ViewFile() {
         </DialogActions>
       </Dialog>
 
-      <Box>
-        {listPrevRoot.map((root) => (
-          <Button
-            key={root.id}
-            onClick={() => {
-              setNowParentRoot(root);
-              setListPrevRoot(listPrevRoot.slice(0, -1));
-            }}
-          >
-            {root.name}
+      <Box sx={{ display: "flex", flexDirection: "row", gap: "48px" }}>
+        <Button
+          onClick={handleBackNavigation}
+          disabled={listPrevRoot.length === 0}
+          color="primary"
+          variant="outlined"
+        >
+          <KeyboardBackspaceIcon></KeyboardBackspaceIcon>
+        </Button>
+        <Breadcrumbs aria-label="breadcrumb">
+          {listPrevRoot?.map((root) => (
+            <Button
+              key={root.id}
+              onClick={() => {
+                clickPreBreadcrumb(root.id);
+              }}
+              color="secondary"
+            >
+              {root.name}
+            </Button>
+          ))}
+
+          <Button key={nowParentRoot.id} color="secondary">
+            {nowParentRoot.name}
           </Button>
-        ))}
+        </Breadcrumbs>
       </Box>
-      <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+
+      <TableContainer component={Paper} sx={{ maxHeight: 440 }}>
+        <Table sx={{ minWidth: 650 }} aria-label="simple table" stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell>Type</TableCell>
-              <TableCell>File id</TableCell>
-              <TableCell>File name</TableCell>
+              <TableCell>Object id</TableCell>
+              <TableCell align="right">Type</TableCell>
+              <TableCell>Object name</TableCell>
               <TableCell>Last modified</TableCell>
               <TableCell>Action</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {files.map((file) => (
+            {files?.map((file) => (
               <TableRow
                 key={`${file.object_id}`}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                sx={{
+                  "&:last-child td, &:last-child th": { border: 0 },
+                  cursor: file.is_file ? "default" : "pointer",
+                  "&:hover": { background: "#c8d6ec" },
+                }}
+                onClick={() => {
+                  if (!file.is_file) {
+                    var newlist: IRoot[] = listPrevRoot.map((item) => item);
+                    newlist.push(nowParentRoot);
+                    setListPrevRoot(newlist);
+
+                    setNowParentRoot({
+                      id: file.object_id,
+                      name: file.name,
+                    });
+                  }
+                }}
               >
+                <TableCell>{file.object_id}</TableCell>
                 {file.is_file ? (
-                  <TableCell>
-                    <InsertDriveFileIcon />
+                  <TableCell align="right">
+                    <Button
+                      disableRipple
+                      disableFocusRipple
+                      disableElevation
+                      sx={{ pointerEvents: "none" }}
+                      color="secondary"
+                    >
+                      <InsertDriveFileIcon />
+                    </Button>
                   </TableCell>
                 ) : (
-                  <TableCell>
+                  <TableCell align="right">
                     <Button
-                      onClick={() => {
-                        setListPrevRoot([...listPrevRoot, nowParentRoot]);
-
-                        setNowParentRoot({
-                          id: file.object_id,
-                          name: file.name,
-                        });
-                      }}
+                      disableRipple
+                      disableFocusRipple
+                      disableElevation
+                      sx={{ pointerEvents: "none" }}
                     >
                       <FolderIcon />
                     </Button>
                   </TableCell>
                 )}
-                <TableCell>{file.object_id}</TableCell>
                 <TableCell component="th" scope="row">
                   {file.name}
                 </TableCell>
                 <TableCell component="th" scope="row">
-                  {file.updated_at}
+                  {dayjs(file.updated_at).format("DD/MM/YYYY HH:mm:ss")}
                 </TableCell>
                 <TableCell>
                   <IconButton
                     onClick={() => {
                       const url = `https://ti-pt-demo.s3.ap-southeast-1.amazonaws.com/${file.key}/${file.name}`;
-                      console.log(url);
+                      //console.log(url);
                       handleDownloadFile(url);
                     }}
                   >
@@ -278,6 +346,9 @@ export default function ViewFile() {
           </TableBody>
         </Table>
       </TableContainer>
+      {files.length === 0 && (
+        <div className="w-full p-14 text-center">Empty folder</div>
+      )}
     </div>
   );
 }

@@ -8,7 +8,7 @@ const Home: React.FC = () => {
       <div className="top-bar-container w-full drop-shadow-lg">
         <AppBar />
       </div>
-      <div className="main-container flex-1">
+      <div className="main-container flex-1 px-8">
         <Outlet />
       </div>
       <div className="footer-container w-full">
