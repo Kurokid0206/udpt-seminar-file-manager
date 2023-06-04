@@ -32,7 +32,7 @@ interface IRoot {
   name: string;
 }
 export default function ViewFile() {
-  const [files, setFiles] = React.useState<iFile[]>([]);
+  const [files, setFiles] = React.useState<IFile[]>([]);
   const [isOpen, setIsOpen] = React.useState(false);
   const [isShowAddFileDialog, setIsShowAddFileDialog] =
     React.useState<boolean>(false);
@@ -89,7 +89,7 @@ export default function ViewFile() {
     ["getAllItemQuery", nowParentRoot],
     () =>
       getSub(nowParentRoot.id).then((result) => {
-        setFiles(result);
+        setFiles(result.data);
       }),
     {
       retry: 2,

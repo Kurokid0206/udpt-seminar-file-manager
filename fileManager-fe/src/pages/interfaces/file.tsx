@@ -1,4 +1,4 @@
-interface iFile {
+interface IFile {
   object_id: number;
   name: string;
   key: string;
