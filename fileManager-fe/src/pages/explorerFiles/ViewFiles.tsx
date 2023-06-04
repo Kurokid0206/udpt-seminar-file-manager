@@ -71,6 +71,26 @@ export default function ViewFile() {
     setIsOpen(false);
   };
 
+  const handleDownloadFile = async (url: string) => {
+    console.log(url);
+    const response = await fetch(
+      "https://ti-pt-demo.s3.ap-southeast-1.amazonaws.com///AishiaNight.png"
+    );
+
+    const blobImage = await response.blob();
+
+    const href = URL.createObjectURL(blobImage);
+
+    const anchorElement = document.createElement("a");
+    anchorElement.href = href;
+    anchorElement.download = "img";
+
+    document.body.appendChild(anchorElement);
+    anchorElement.click();
+
+    document.body.removeChild(anchorElement);
+    window.URL.revokeObjectURL(href);
+  };
   //==================================================================================
   //query and mutation
   const addFolderMutation = useMutation(
@@ -118,6 +138,7 @@ export default function ViewFile() {
   }, [addFileMutation.isLoading]);
 
   React.useEffect(() => {}, [nowParentRoot]);
+
   return (
     <div>
       <div className="flex justify-end">
@@ -246,6 +267,7 @@ export default function ViewFile() {
                     onClick={() => {
                       const url = `https://ti-pt-demo.s3.ap-southeast-1.amazonaws.com/${file.key}/${file.name}`;
                       console.log(url);
+                      handleDownloadFile(url);
                     }}
                   >
                     {file.is_file ? <FileDownloadIcon /> : null}

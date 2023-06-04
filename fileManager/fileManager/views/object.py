@@ -16,7 +16,8 @@ class ObjectViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['GET'], url_path='get-sub')
     def get_sub_dir(self, request, pk=None):
-        sub_dir = Object.objects.filter(parent_root=pk)
+        sub_dir = Object.objects.filter(
+            parent_root=pk).order_by('is_file', 'name')
         serializer = ObjectSerializer(sub_dir, many=True)
         return Response(serializer.data)
 
