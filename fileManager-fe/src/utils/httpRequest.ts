@@ -10,8 +10,8 @@ const httpRequest = axios.create({
 
 httpRequest.interceptors.response.use(
   (response) => {
-    if (response && response.data) {
-      return response.data;
+    if (response) {
+      return response;
     }
 
     return response;

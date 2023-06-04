@@ -89,7 +89,7 @@ export default function ViewFile() {
     ["getAllItemQuery", nowParentRoot],
     () =>
       getSub(nowParentRoot.id).then((result) => {
-        setFiles(result.data);
+        setFiles(result.data as IFile[]);
       }),
     {
       retry: 2,
