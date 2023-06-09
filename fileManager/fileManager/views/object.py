@@ -44,7 +44,10 @@ class ObjectViewSet(viewsets.ModelViewSet):
         root = Object.objects.get(object_id=pk)
 
         request_data = request.data
-        request_data['key'] = root.key + '/' + root.name
+        request_data['key'] = (root.key + '/' + root.name).replace('//', '')
+        if request_data['key'][0] == '/':
+            request_data['key'] = request_data['key'][1:]
+        print(request_data['key'])
         request_data['parent_root'] = pk
         file = request.FILES['file']
         request_data['name'] = file.name

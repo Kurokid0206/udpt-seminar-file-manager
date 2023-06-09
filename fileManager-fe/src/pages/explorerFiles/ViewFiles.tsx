@@ -25,7 +25,6 @@ import {
   Fab,
   IconButton,
   TextField,
-  dividerClasses,
 } from "@mui/material";
 import { useMutation, useQuery } from "react-query";
 import dayjs from "dayjs";
@@ -104,10 +103,10 @@ export default function ViewFile() {
   };
 
   const handleDownloadFile = async (url: string) => {
-    //console.log(url);
+    // console.log(url.replace("//", "/"));
     const response = await fetch(
-      // đổi chỗ này khi chạy thật
-      "https://ti-pt-demo.s3.ap-southeast-1.amazonaws.com///AishiaNight.png"
+      // "https://ti-pt-demo.s3.ap-southeast-1.amazonaws.com///AishiaNight.png"
+      url
     );
 
     const blobImage = await response.blob();
@@ -163,7 +162,6 @@ export default function ViewFile() {
     }
   }, [addFileMutation.isLoading, addFolderMutation.isLoading]);
 
-  console.log(listPrevRoot.length === 0);
   return (
     <div>
       <div className="flex justify-end">
@@ -288,9 +286,9 @@ export default function ViewFile() {
                 }}
                 onClick={() => {
                   if (!file.is_file) {
-                    var newlist: IRoot[] = listPrevRoot.map((item) => item);
-                    newlist.push(nowParentRoot);
-                    setListPrevRoot(newlist);
+                    let newList: IRoot[] = listPrevRoot.map((item) => item);
+                    newList.push(nowParentRoot);
+                    setListPrevRoot(newList);
 
                     setNowParentRoot({
                       id: file.object_id,
@@ -333,8 +331,19 @@ export default function ViewFile() {
                 <TableCell>
                   <IconButton
                     onClick={() => {
-                      const url = `https://ti-pt-demo.s3.ap-southeast-1.amazonaws.com/${file.key}/${file.name}`;
-                      //console.log(url);
+                      const objectPath = `${file.key}/${file.name}`;
+                      // console.log(
+                      //   `${
+                      //     objectPath[0] == "/"
+                      //       ? objectPath.slice(1)
+                      //       : objectPath
+                      //   }`
+                      // );
+
+                      const url = `https://ti-pt-demo.s3.ap-southeast-1.amazonaws.com/${
+                        objectPath[0] == "/" ? objectPath.slice(1) : objectPath
+                      }`;
+                      // console.log(url);
                       handleDownloadFile(url);
                     }}
                   >
