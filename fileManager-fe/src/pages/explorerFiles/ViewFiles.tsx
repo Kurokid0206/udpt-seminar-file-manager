@@ -102,7 +102,7 @@ export default function ViewFile() {
     }
   };
 
-  const handleDownloadFile = async (url: string) => {
+  const handleDownloadFile = async (url: string, name: string) => {
     // console.log(url.replace("//", "/"));
     const response = await fetch(
       // "https://ti-pt-demo.s3.ap-southeast-1.amazonaws.com///AishiaNight.png"
@@ -115,7 +115,7 @@ export default function ViewFile() {
 
     const anchorElement = document.createElement("a");
     anchorElement.href = href;
-    anchorElement.download = "img";
+    anchorElement.download = name;
 
     document.body.appendChild(anchorElement);
     anchorElement.click();
@@ -344,7 +344,7 @@ export default function ViewFile() {
                         objectPath[0] == "/" ? objectPath.slice(1) : objectPath
                       }`;
                       // console.log(url);
-                      handleDownloadFile(url);
+                      handleDownloadFile(url, file.name);
                     }}
                   >
                     {file.is_file ? <FileDownloadIcon /> : null}
