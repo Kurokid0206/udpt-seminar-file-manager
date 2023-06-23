@@ -62,7 +62,7 @@ class ObjectViewSet(viewsets.ModelViewSet):
                     validated_data=serializer.validated_data)
                 result = ObjectSerializer(object).data
                 return Response({'status': status.HTTP_200_OK,
-                                 'message': 'success',
+                                'message': 'success',
                                  'data': result})
             except Exception as e:
                 print(f'error: {e}')
